@@ -1,7 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exeption.EmailExists;
+import ru.practicum.shareit.exeption.EmailExistsException;
 import ru.practicum.shareit.exeption.NotFoundException;
 
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class MemoryUserStorage implements UserStorage {
     private void verifyUserEmail(int id, String email) {
         for (User user : users.values()) {
             if (user.getEmail().equals(email) && user.getId() != id) {
-                throw new EmailExists("This email already exists");
+                throw new EmailExistsException("This email already exists");
             }
         }
     }
@@ -54,6 +54,12 @@ public class MemoryUserStorage implements UserStorage {
     @Override
     public Collection<User> getAllUsers() {
         return users.values();
+    }
+
+    @Override
+    public boolean deleteUser(int id) {
+        users.remove(id);
+        return true;
     }
 
     @Override

@@ -12,4 +12,6 @@ public interface UserStorage {
     Collection<User> getAllUsers();
 
     void verifyUser(User user);
+
+    boolean deleteUser(int id);
 }

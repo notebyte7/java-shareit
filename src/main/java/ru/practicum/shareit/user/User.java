@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user;
 
 import lombok.Data;
-import lombok.NonNull;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -14,8 +13,12 @@ public class User {
     private int id;
     @NotBlank(message = "Поле name не должно быть пустым")
     private String name;
-    @Email(message = "Поле email неправильное")
-    @NotBlank(message = "Поле email не должно быть пустым")
-§    @NonNull
+    @NotBlank
+    @Email
     private String email;
+
+    public User(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
 }

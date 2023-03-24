@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Collection;
 
 /**
@@ -18,25 +19,31 @@ public class UserController {
 
     @PostMapping
     @ResponseBody
-    public User createUser(@RequestBody User user) {
+    public User createUser(@Valid @RequestBody User user) {
         return userService.createUser(user);
     }
 
-    @PatchMapping(value = "/{id}")
+    @PatchMapping(value = "/{userId}")
     @ResponseBody
-    public User updateUser(@RequestParam int id, @RequestBody User user) {
-        return userService.updateUser(id, user);
+    public User updateUser(@RequestBody User user, @PathVariable int userId) {
+        return userService.updateUser(userId, user);
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{userId}")
     @ResponseBody
-    public User getUserById(@PathVariable int id) {
-        return userService.getUserById(id);
+    public User getUserById(@PathVariable int userId) {
+        return userService.getUserById(userId);
     }
 
     @GetMapping
     @ResponseBody
     public Collection<User> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+    @DeleteMapping(value = "/{userId}")
+    @ResponseBody
+    public void deleteUser(@PathVariable int userId) {
+        userService.deleteUser(userId);
     }
 }

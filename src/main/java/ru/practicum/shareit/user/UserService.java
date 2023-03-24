@@ -28,8 +28,8 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        User newUser = userStorage.getUserById(id);
-        if (newUser != null) {
+        if (isExist(id)) {
+            User newUser = userStorage.getUserById(id);
             return newUser;
         } else {
             throw new NotFoundException("User by Id not found");
@@ -38,7 +38,6 @@ public class UserService {
 
     private boolean isExist(int id) {
         return userStorage.getUserById(id) != null;
-
     }
 
     public Collection<User> getAllUsers() {
@@ -52,5 +51,13 @@ public class UserService {
     private void verifyUser(int id, User user) {
         user.setId(id);
         userStorage.verifyUser(user);
+    }
+
+    public boolean deleteUser(int id) {
+        if (isExist(id)) {
+            return userStorage.deleteUser(id);
+        } else {
+            throw new NotFoundException("User by Id not found");
+        }
     }
 }
