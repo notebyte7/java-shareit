@@ -1,11 +1,15 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exeption.ForbiddenException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserStorage;
 
 import java.util.Collection;
+
+import static ru.practicum.shareit.item.ItemMapper.toItem;
 
 @Component
 public class ItemServiceImpl implements ItemService {
@@ -19,8 +23,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createItem(int userId, ItemDto itemDto) {
-        if (userStorage.getUserById(userId) != null) {
-            return itemStorage.createItem(userId, itemDto);
+        if (userStorage.getUserDtoById(userId) != null) {
+            Item item = toItem(itemDto, userId);
+            return itemStorage.createItem(item);
         } else {
             throw new NotFoundException("User not found");
         }
@@ -28,12 +33,21 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(int userId, int itemId, ItemDto itemDto) {
-        return itemStorage.updateItem(userId, itemId, itemDto);
+        if (itemStorage.getItemById(itemId).getOwner() == userId) {
+            Item item = toItem(itemDto, userId);
+            return itemStorage.updateItem(userId, itemId, item);
+        } else {
+            throw new ForbiddenException("Доступ закрыт, нельзя менять item не его владельцу");
+        }
     }
 
     @Override
     public ItemDto getItemDtoById(int itemId) {
-        return itemStorage.getItemDtoById(itemId);
+        if (itemStorage.getItemDtoById(itemId) != null) {
+            return itemStorage.getItemDtoById(itemId);
+        } else {
+            throw new NotFoundException("Item not found");
+        }
     }
 
     @Override
@@ -43,6 +57,6 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> searchItemsByTest(String text) {
-        return itemStorage.searchItemsByTest(text);
+        return itemStorage.searchItemsByText(text);
     }
 }

@@ -2,8 +2,12 @@ package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
+
+import static ru.practicum.shareit.user.UserMapper.toUser;
 
 @Service
 public class UserService {
@@ -13,13 +17,15 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public User createUser(User user) {
+    public UserDto createUser(UserDto userDto) {
+        User user = toUser(userDto);
         verifyUser(user);
         return userStorage.createUser(user);
     }
 
-    public User updateUser(int id, User user) {
+    public UserDto updateUser(int id, UserDto userDto) {
         if (isExist(id)) {
+            User user = toUser(userDto);
             verifyUser(id, user);
             return userStorage.updateUser(id, user);
         } else {
@@ -27,29 +33,28 @@ public class UserService {
         }
     }
 
-    public User getUserById(int id) {
+    public UserDto getUserById(int id) {
         if (isExist(id)) {
-            User newUser = userStorage.getUserById(id);
-            return newUser;
+            UserDto newUserDto = userStorage.getUserDtoById(id);
+            return newUserDto;
         } else {
             throw new NotFoundException("User by Id not found");
         }
     }
 
     private boolean isExist(int id) {
-        return userStorage.getUserById(id) != null;
+        return userStorage.getUserDtoById(id) != null;
     }
 
-    public Collection<User> getAllUsers() {
+    public Collection<UserDto> getAllUsers() {
         return userStorage.getAllUsers();
     }
 
-    private void verifyUser(User user) {
-        userStorage.verifyUser(user);
+    private void verifyUser(int id, User user) {
+        userStorage.verifyUser(id, user);
     }
 
-    private void verifyUser(int id, User user) {
-        user.setId(id);
+    private void verifyUser(User user) {
         userStorage.verifyUser(user);
     }
 

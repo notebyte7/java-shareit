@@ -3,8 +3,6 @@ package ru.practicum.shareit.item;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
-import javax.validation.Valid;
-
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(
@@ -16,7 +14,6 @@ public class ItemMapper {
         );
     }
 
-    @Valid
     public static Item toItem(ItemDto itemDto, int ownerId) {
         return new Item(
                 itemDto.getId(),
