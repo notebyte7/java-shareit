@@ -1,13 +1,16 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exeption.EmailExistsException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.user.UserMapper.toUser;
+import static ru.practicum.shareit.user.UserMapper.toUserDto;
 
 @Service
 public class UserService {
@@ -20,14 +23,14 @@ public class UserService {
     public UserDto createUser(UserDto userDto) {
         User user = toUser(userDto);
         verifyUser(user);
-        return userStorage.createUser(user);
+        return toUserDto(userStorage.createUser(user));
     }
 
     public UserDto updateUser(int id, UserDto userDto) {
         if (isExist(id)) {
             User user = toUser(userDto);
             verifyUser(id, user);
-            return userStorage.updateUser(id, user);
+            return toUserDto(userStorage.updateUser(id, user));
         } else {
             throw new NotFoundException("Update User not found");
         }
@@ -35,27 +38,36 @@ public class UserService {
 
     public UserDto getUserById(int id) {
         if (isExist(id)) {
-            UserDto newUserDto = userStorage.getUserDtoById(id);
-            return newUserDto;
+            return toUserDto(userStorage.getUserById(id));
         } else {
             throw new NotFoundException("User by Id not found");
         }
     }
 
     private boolean isExist(int id) {
-        return userStorage.getUserDtoById(id) != null;
+        return userStorage.getUserById(id) != null;
     }
 
     public Collection<UserDto> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userStorage.getAllUsers().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 
     private void verifyUser(int id, User user) {
-        userStorage.verifyUser(id, user);
+        boolean verify = getAllUsers().stream()
+                .noneMatch(u -> u.getEmail().equalsIgnoreCase(user.getEmail()) && u.getId() != id);
+        if (!verify) {
+            throw new EmailExistsException("This email already exists");
+        }
     }
 
     private void verifyUser(User user) {
-        userStorage.verifyUser(user);
+        boolean verify = getAllUsers().stream()
+                .noneMatch(u -> u.getEmail().equalsIgnoreCase(user.getEmail()));
+        if (!verify) {
+            throw new EmailExistsException("This email already exists");
+        }
     }
 
     public boolean deleteUser(int id) {
