@@ -2,6 +2,7 @@ package ru.practicum.shareit.item;
 
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemWithLastAndNextBookingAndComments;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -10,11 +11,11 @@ import java.util.Collection;
  * TODO Sprint add-controllers.
  */
 @RestController
-@RequestMapping("/items")
+@RequestMapping(path = "/items")
 public class ItemController {
-    private final ItemService itemService;
+    private final ItemServiceImpl itemService;
 
-    public ItemController(ItemService itemService) {
+    public ItemController(ItemServiceImpl itemService) {
         this.itemService = itemService;
     }
 
@@ -33,13 +34,13 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     @ResponseBody
-    public ItemDto getItemDtoById(@PathVariable int itemId) {
-        return itemService.getItemDtoById(itemId);
+    public ItemWithLastAndNextBookingAndComments getItemDtoById(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable int itemId) {
+        return itemService.getItemDtoById(userId, itemId);
     }
 
     @GetMapping
     @ResponseBody
-    public Collection<ItemDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public Collection<ItemWithLastAndNextBookingAndComments> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") int userId) {
         return itemService.getItemsByOwner(userId);
     }
 
