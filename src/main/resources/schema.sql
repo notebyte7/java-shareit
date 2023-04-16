@@ -74,6 +74,6 @@ create table if not exists COMMENTS
     constraint "COMMENTS_ITEM_ID_fk"
         foreign key (ITEM_ID) references ITEMS (ID),
     constraint "COMMENTS_AUTHOR_ID_fk"
-        foreign key (AUTHOR_ID) references USERS
+        foreign key (AUTHOR_ID) references USERS (ID)
 );
 

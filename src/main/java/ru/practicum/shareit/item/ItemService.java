@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentWithName;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemWithLastAndNextBookingAndComments;
 
@@ -16,4 +18,6 @@ public interface ItemService {
     Collection<ItemWithLastAndNextBookingAndComments> getItemsByOwner(int userId);
 
     Collection<ItemDto> searchItemsByTest(String text);
+
+    CommentWithName createComment(int userId, int itemId, CommentDto comment);
 }

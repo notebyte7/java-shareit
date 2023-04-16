@@ -3,6 +3,8 @@ package ru.practicum.shareit.item.dto;
 import lombok.Value;
 import ru.practicum.shareit.booking.model.BookingShortForItem;
 
+import java.util.Collection;
+
 @Value
 public class ItemWithLastAndNextBookingAndComments {
     Integer id;
@@ -12,5 +14,5 @@ public class ItemWithLastAndNextBookingAndComments {
     Integer ownerId;
     BookingShortForItem lastBooking;
     BookingShortForItem nextBooking;
-    //List<CommentWithAuthorName> comments;
+    Collection<CommentWithName> comments;
 }

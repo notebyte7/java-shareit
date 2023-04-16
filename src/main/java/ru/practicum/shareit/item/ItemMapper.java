@@ -6,6 +6,8 @@ import ru.practicum.shareit.item.dto.ItemWithLastAndNextBookingAndComments;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.stream.Collectors;
+
 public class ItemMapper {
     public static ItemDto toItemDto(Item item) {
         return new ItemDto(
@@ -36,7 +38,10 @@ public class ItemMapper {
                 item.getAvailable(),
                 item.getOwner().getId(),
                 lastBooking,
-                nextBooking
+                nextBooking,
+                item.getComment().stream()
+                        .map(CommentMapper::toCommentWithName)
+                        .collect(Collectors.toList())
         );
     }
 }

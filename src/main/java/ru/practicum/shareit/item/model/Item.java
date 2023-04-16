@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.util.Collection;
 
 /**
  * TODO Sprint add-controllers.
@@ -30,6 +31,10 @@ public class Item {
     private User owner;
     @Column(name = "request_id")
     private Integer request;
+
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "item_id")
+    private Collection<Comment> comment;
 
     public Item(Integer id, String name, String description, Boolean available, User owner) {
         this.id = id;
