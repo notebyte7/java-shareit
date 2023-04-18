@@ -6,7 +6,7 @@ import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 
 @Value
-public class CommentWithName {
+public class CommentOutputDto {
     Integer id;
     @NotBlank(message = "Поле text не должно быть пустым")
     String text;

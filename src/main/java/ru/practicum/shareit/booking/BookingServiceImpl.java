@@ -1,10 +1,10 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingDtoWithItemAndBooker;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingDto;
-import ru.practicum.shareit.booking.model.State;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.WrongCommandException;
 import ru.practicum.shareit.exeption.WrongStateException;
@@ -32,7 +32,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDtoWithItemAndBooker createBooking(int bookerId, BookingDto bookingDto) {
+    public BookingOutputDto createBooking(int bookerId, BookingDto bookingDto) {
         if (itemRepository.findById(bookingDto.getItemId()).isPresent() && userRepository.findById(bookerId).isPresent()) {
             Booking booking = toBooking(bookingDto, itemRepository.findById(bookingDto.getItemId()).get(),
                     userRepository.findById(bookerId).get());
@@ -63,7 +63,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDtoWithItemAndBooker approvingBooking(int userId, int bookingId, boolean approved) {
+    public BookingOutputDto approvingBooking(int userId, int bookingId, boolean approved) {
         if (bookingRepository.findById(bookingId).isPresent()) {
             Booking booking = bookingRepository.findById(bookingId).get();
             if (booking.getItem() != null) {
@@ -97,7 +97,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingDtoWithItemAndBooker getBookingById(int userId, int bookingId) {
+    public BookingOutputDto getBookingById(int userId, int bookingId) {
         if (bookingRepository.findById(bookingId).isPresent()) {
             Booking booking = bookingRepository.findById(bookingId).get();
             if (booking.getItem() != null) {
@@ -115,26 +115,26 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoWithItemAndBooker> getBookingByUser(int userId, State state) {
+    public List<BookingOutputDto> getBookingByUser(int userId, State state) {
         if (userRepository.existsById(userId)) {
             if (state.equals(State.ALL)) {
                 return bookingRepository.findAllByBookerIdOrderByStartDesc(userId).stream()
                         .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
             } else if (state.equals(State.CURRENT)) {
-                return bookingRepository.findBookingByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(),
                                 LocalDateTime.now()).stream()
                         .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
             } else if (state.equals(State.PAST)) {
-                return bookingRepository.findBookingByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
                         .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
             } else if (state.equals(State.FUTURE)) {
-                return bookingRepository.findBookingByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()).stream()
                         .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
             } else if (state.equals(State.WAITING)) {
-                return bookingRepository.findBookingsByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
+                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
                         .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
             } else if (state.equals(State.REJECTED)) {
-                return bookingRepository.findBookingsByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
+                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
                         .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
             } else {
                 throw new WrongStateException(String.format("Unknown state: %s", state));
@@ -145,15 +145,15 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoWithItemAndBooker> getBookingByOwner(int userId, State state) {
+    public List<BookingOutputDto> getBookingByOwner(int userId, State state) {
         if (userRepository.existsById(userId)) {
             if (itemRepository.findByOwner_Id(userId).size() > 0) {
                 if (state.equals(State.ALL)) {
-                    return bookingRepository.findBookingsByItem_Owner_IdOrderByStartDesc(userId).stream()
+                    return bookingRepository.findByItem_Owner_IdOrderByStartDesc(userId).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker)
                             .collect(Collectors.toList());
                 } else if (state.equals(State.CURRENT)) {
-                    return bookingRepository.findBookingsByOwnItemByUserAndCurrent(userId, LocalDateTime.now()).stream()
+                    return bookingRepository.findCurrentByOwner(userId, LocalDateTime.now()).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                 } else if (state.equals(State.PAST)) {
                     return bookingRepository.findBookingsByOwnItemByUserAndPast(userId, LocalDateTime.now()).stream()

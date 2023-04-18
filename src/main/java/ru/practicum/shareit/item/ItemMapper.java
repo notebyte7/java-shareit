@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.booking.model.BookingShortForItem;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithLastAndNextBookingAndComments;
+import ru.practicum.shareit.item.dto.ItemOutputDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -29,9 +29,9 @@ public class ItemMapper {
         );
     }
 
-    public static ItemWithLastAndNextBookingAndComments toItemWithBooking(Item item,
-                                                                          BookingShortForItem lastBooking, BookingShortForItem nextBooking) {
-        return new ItemWithLastAndNextBookingAndComments(
+    public static ItemOutputDto toItemWithBooking(Item item,
+                                                  BookingShortDto lastBooking, BookingShortDto nextBooking) {
+        return new ItemOutputDto(
                 item.getId(),
                 item.getName(),
                 item.getDescription(),

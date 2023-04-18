@@ -2,9 +2,9 @@ package ru.practicum.shareit.item;
 
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentWithName;
+import ru.practicum.shareit.item.dto.CommentOutputDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithLastAndNextBookingAndComments;
+import ru.practicum.shareit.item.dto.ItemOutputDto;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -36,13 +36,13 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     @ResponseBody
-    public ItemWithLastAndNextBookingAndComments getItemDtoById(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable int itemId) {
+    public ItemOutputDto getItemDtoById(@RequestHeader("X-Sharer-User-Id") int userId, @PathVariable int itemId) {
         return itemService.getItemDtoById(userId, itemId);
     }
 
     @GetMapping
     @ResponseBody
-    public Collection<ItemWithLastAndNextBookingAndComments> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public Collection<ItemOutputDto> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") int userId) {
         return itemService.getItemsByOwner(userId);
     }
 
@@ -55,8 +55,8 @@ public class ItemController {
 
     @PostMapping("/{itemId}/comment")
     @ResponseBody
-    public CommentWithName createComment(@RequestHeader(name = "X-Sharer-User-Id") Integer userId,
-                                         @PathVariable Integer itemId, @RequestBody @Valid CommentDto comment) {
+    public CommentOutputDto createComment(@RequestHeader(name = "X-Sharer-User-Id") Integer userId,
+                                          @PathVariable Integer itemId, @RequestBody @Valid CommentDto comment) {
         return itemService.createComment(userId, itemId, comment);
     }
 }

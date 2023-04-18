@@ -19,9 +19,10 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     @Query("select i from Item i " +
             "where i.owner.id = ?1 ")
-    List<Item> searchByOwner(int ownerId, LocalDateTime now);
+    List<Item> searchByOwner(int ownerId);
 
     @Query("select i.id from Item i " +
             "where i.owner.id = ?1 ")
     List<Integer> searchItem_IdByOwner(int ownerId, LocalDateTime now);
+
 }

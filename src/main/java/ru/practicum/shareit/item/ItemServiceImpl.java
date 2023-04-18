@@ -2,16 +2,16 @@ package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.booking.dto.BookingShortDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingShortForItem;
+import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exeption.ForbiddenException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.WrongCommandException;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.CommentWithName;
+import ru.practicum.shareit.item.dto.CommentOutputDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemWithLastAndNextBookingAndComments;
+import ru.practicum.shareit.item.dto.ItemOutputDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
@@ -81,16 +81,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemWithLastAndNextBookingAndComments getItemDtoById(int userId, int itemId) {
+    public ItemOutputDto getItemDtoById(int userId, int itemId) {
         if (itemRepository.findById(itemId).isPresent()) {
             Item item = itemRepository.findById(itemId).get();
             if (item.getOwner().getId() == userId) {
                 Collection<Booking> bookings = bookingRepository.findBookingsByItem_Id(itemId);
-                BookingShortForItem lastBooking = null;
-                BookingShortForItem nextBooking = null;
+                BookingShortDto lastBooking = null;
+                BookingShortDto nextBooking = null;
                 if (bookings.size() != 0) {
-                    lastBooking = getLastBooking(bookings);
-                    nextBooking = getNextBooking(bookings);
+                    lastBooking = getLastBooking(bookings, itemId);
+                    nextBooking = getNextBooking(bookings, itemId);
                 }
                 return toItemWithBooking(item, lastBooking, nextBooking);
             } else {
@@ -102,19 +102,18 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemWithLastAndNextBookingAndComments> getItemsByOwner(int ownerId) {
-        Collection<Integer> itemIds = itemRepository.searchItem_IdByOwner(ownerId, LocalDateTime.now());
-        Collection<ItemWithLastAndNextBookingAndComments> itemsWithBooking = new ArrayList<>();
-        for (Integer id : itemIds) {
-            Item item = itemRepository.findById(id).get();
-            Collection<Booking> bookings = bookingRepository.findBookingsByItem_Id(item.getId());
-            BookingShortForItem lastBooking = null;
-            BookingShortForItem nextBooking = null;
+    public Collection<ItemOutputDto> getItemsByOwner(int ownerId) {
+        Collection<Item> items = itemRepository.searchByOwner(ownerId);
+        Collection<Booking> bookings = bookingRepository.findByOwner(ownerId);
+        Collection<ItemOutputDto> itemsWithBooking = new ArrayList<>();
+        for (Item item : items) {
+            BookingShortDto lastBooking = null;
+            BookingShortDto nextBooking = null;
             if (bookings.size() != 0) {
-                lastBooking = getLastBooking(bookings);
-                nextBooking = getNextBooking(bookings);
+                lastBooking = getLastBooking(bookings, item.getId());
+                nextBooking = getNextBooking(bookings, item.getId());
             }
-            ItemWithLastAndNextBookingAndComments itemWithBookings = toItemWithBooking(item, lastBooking, nextBooking);
+            ItemOutputDto itemWithBookings = toItemWithBooking(item, lastBooking, nextBooking);
             itemsWithBooking.add(itemWithBookings);
 
 
@@ -135,7 +134,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public CommentWithName createComment(int userId, int itemId, CommentDto commentDto) {
+    public CommentOutputDto createComment(int userId, int itemId, CommentDto commentDto) {
         if (itemRepository.findById(itemId).isPresent()) {
             Collection<Booking> bookings = bookingRepository.findBookingsByItem_Id(itemId);
             if (bookings.stream()
@@ -157,8 +156,9 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    BookingShortForItem getLastBooking(Collection<Booking> bookings) {
+    private BookingShortDto getLastBooking(Collection<Booking> bookings, int itemId) {
         Booking booking = bookings.stream()
+                .filter(b -> b.getItem().getId() == itemId)
                 .filter(b -> b.getStart().isBefore(LocalDateTime.now()))
                 .filter(b -> b.getStatus().equals(Status.APPROVED) || b.getStatus().equals(Status.WAITING))
                 .max(Comparator.comparing(Booking::getEnd)).orElse(null);
@@ -169,8 +169,9 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
-    BookingShortForItem getNextBooking(Collection<Booking> bookings) {
+    private BookingShortDto getNextBooking(Collection<Booking> bookings, int itemId) {
         Booking booking = bookings.stream()
+                .filter(b -> b.getItem().getId() == itemId)
                 .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
                 .filter(b -> b.getStatus().equals(Status.APPROVED) || b.getStatus().equals(Status.WAITING))
                 .min(Comparator.comparing(Booking::getStart)).orElse(null);
