@@ -7,6 +7,9 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
+import static ru.practicum.shareit.booking.StatusMapper.toStatus;
+import static ru.practicum.shareit.booking.StatusMapper.toStatusDto;
+
 public class BookingMapper {
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(
@@ -15,7 +18,7 @@ public class BookingMapper {
                 booking.getEnd(),
                 booking.getItem().getId(),
                 booking.getBooker().getId(),
-                booking.getStatus()
+                toStatusDto(booking.getStatus())
         );
     }
 
@@ -26,7 +29,7 @@ public class BookingMapper {
                 booking.getEnd(),
                 booking.getItem(),
                 booking.getBooker(),
-                booking.getStatus()
+                toStatusDto(booking.getStatus())
         );
     }
 
@@ -37,7 +40,7 @@ public class BookingMapper {
                 bookingDto.getEnd(),
                 item,
                 user,
-                bookingDto.getStatus()
+                toStatus(bookingDto.getStatus())
         );
     }
 

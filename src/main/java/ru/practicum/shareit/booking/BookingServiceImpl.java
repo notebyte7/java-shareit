@@ -149,7 +149,7 @@ public class BookingServiceImpl implements BookingService {
         if (userRepository.existsById(userId)) {
             if (itemRepository.findByOwner_Id(userId).size() > 0) {
                 if (state.equals(State.ALL)) {
-                    return bookingRepository.findByItem_Owner_IdOrderByStartDesc(userId).stream()
+                    return bookingRepository.findByItemOwnerIdOrderByStartDesc(userId).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker)
                             .collect(Collectors.toList());
                 } else if (state.equals(State.CURRENT)) {

@@ -44,11 +44,13 @@ public class BookingController {
     @ResponseBody
     List<BookingOutputDto> getBookingByUser(@RequestHeader(value = "X-Sharer-User-Id", required = false) int userId,
                                             @RequestParam(defaultValue = "ALL", required = false) String state) {
+        State stateEnum;
         try {
-            return bookingService.getBookingByUser(userId, State.valueOf(state));
+            stateEnum = State.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new WrongStateException(String.format("Unknown state: %s", state));
         }
+        return bookingService.getBookingByUser(userId, stateEnum);
     }
 
     @GetMapping("/owner")

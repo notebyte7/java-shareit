@@ -85,7 +85,7 @@ public class ItemServiceImpl implements ItemService {
         if (itemRepository.findById(itemId).isPresent()) {
             Item item = itemRepository.findById(itemId).get();
             if (item.getOwner().getId() == userId) {
-                Collection<Booking> bookings = bookingRepository.findBookingsByItem_Id(itemId);
+                Collection<Booking> bookings = bookingRepository.findBookingsByItemId(itemId);
                 BookingShortDto lastBooking = null;
                 BookingShortDto nextBooking = null;
                 if (bookings.size() != 0) {
@@ -122,7 +122,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> searchItemsByTest(String text) {
+    public Collection<ItemDto> searchItemsByText(String text) {
         if (text.length() > 0) {
             text = text.toLowerCase();
             return itemRepository.search(text).stream()
@@ -136,7 +136,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public CommentOutputDto createComment(int userId, int itemId, CommentDto commentDto) {
         if (itemRepository.findById(itemId).isPresent()) {
-            Collection<Booking> bookings = bookingRepository.findBookingsByItem_Id(itemId);
+            Collection<Booking> bookings = bookingRepository.findBookingsByItemId(itemId);
             if (bookings.stream()
                     .filter(booking -> booking.getItem().getId().equals(itemId))
                     .filter(booking -> booking.getStatus().equals(Status.APPROVED))

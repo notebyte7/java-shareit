@@ -17,7 +17,7 @@ public interface ItemService {
 
     Collection<ItemOutputDto> getItemsByOwner(int userId);
 
-    Collection<ItemDto> searchItemsByTest(String text);
+    Collection<ItemDto> searchItemsByText(String text);
 
     CommentOutputDto createComment(int userId, int itemId, CommentDto comment);
 }

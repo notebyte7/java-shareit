@@ -20,7 +20,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     List<Booking> findByBookerIdAndStatusOrderByStartDesc(int userId, Status status);
 
-    List<Booking> findByItem_Owner_IdOrderByStartDesc(int userId);
+    List<Booking> findByItemOwnerIdOrderByStartDesc(int userId);
 
     @Query("select b " +
             "from Booking as b " +
@@ -57,6 +57,6 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "order by b.start desc ")
     List<Booking> findByOwner(int userId);
 
-    Collection<Booking> findBookingsByItem_Id(int itemId);
+    Collection<Booking> findBookingsByItemId(int itemId);
 
 }

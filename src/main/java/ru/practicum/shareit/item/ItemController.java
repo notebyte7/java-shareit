@@ -50,7 +50,7 @@ public class ItemController {
     @ResponseBody
     public Collection<ItemDto> searchItemsByText(@RequestHeader("X-Sharer-User-Id") int userId,
                                                  @RequestParam String text) {
-        return itemService.searchItemsByTest(text);
+        return itemService.searchItemsByText(text);
     }
 
     @PostMapping("/{itemId}/comment")
