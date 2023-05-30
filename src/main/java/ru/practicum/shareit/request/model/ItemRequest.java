@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class ItemRequest {
     User requestor;
     LocalDateTime created;
     @OneToMany(mappedBy = "request", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonBackReference
+    //@JsonBackReference
     List<Item> items;
 
     public ItemRequest(int id, String description, User requestor, LocalDateTime created) {

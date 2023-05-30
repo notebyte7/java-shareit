@@ -55,7 +55,7 @@ public class ItemServiceImpl implements ItemService {
             ItemRequest itemRequest = null;
             if (itemDto.getRequestId() != null) {
                 int requestId = itemDto.getRequestId();
-                itemRequest = requestRepository.findItemRequestById(requestId);
+                itemRequest = requestRepository.findById(requestId).get();
             }
             Item item = toItem(itemDto, owner, itemRequest);
             return toItemDto(itemRepository.save(item));

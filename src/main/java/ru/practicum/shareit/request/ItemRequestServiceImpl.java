@@ -54,6 +54,20 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
+    public ItemRequestDto getRequests(int userId, int requestId) {
+        if (userRepository.findById(userId).isPresent()) {
+            if (requestRepository.findById(requestId).isPresent()) {
+                return toItemRequestDto(requestRepository.findById(requestId).get());
+            } else {
+                throw new NotFoundException("Request не существует");
+            }
+
+        } else {
+            throw new NotFoundException("Пользователь не существует");
+        }
+    }
+
+    @Override
     public Collection<ItemRequestDto> getRequestsAll(int userId, Integer from, Integer size) {
         if (from == null && size == null) {
             return new ArrayList<>();

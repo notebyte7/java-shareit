@@ -1,7 +1,5 @@
 package ru.practicum.shareit.item.model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +34,8 @@ public class Item {
     private User owner;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "request_id")
-    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
-            property = "id")
+    //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
+    //       property = "id")
     private ItemRequest request;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
