@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Integer> {
+    List<Item> findByRequestId(int id);
+
     List<Item> findByOwner_Id(Integer id);
 
     @Query(" select i " +

@@ -14,6 +14,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemOutputDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -34,21 +36,28 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository requestRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
                            BookingRepository bookingRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository, ItemRequestRepository requestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.requestRepository = requestRepository;
     }
 
     @Override
     public ItemDto createItem(int userId, ItemDto itemDto) {
         if (userRepository.findById(userId).isPresent()) {
             User owner = userRepository.findById(userId).get();
-            Item item = toItem(itemDto, owner);
+            ItemRequest itemRequest = null;
+            if (itemDto.getRequestId() != null) {
+                int requestId = itemDto.getRequestId();
+                itemRequest = requestRepository.findItemRequestById(requestId);
+            }
+            Item item = toItem(itemDto, owner, itemRequest);
             return toItemDto(itemRepository.save(item));
         } else {
             throw new NotFoundException("User not found");
@@ -115,8 +124,6 @@ public class ItemServiceImpl implements ItemService {
             }
             ItemOutputDto itemWithBookings = toItemWithBooking(item, lastBooking, nextBooking);
             itemsWithBooking.add(itemWithBookings);
-
-
         }
         return itemsWithBooking;
     }
