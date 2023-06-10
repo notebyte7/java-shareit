@@ -21,7 +21,9 @@ public class UserServiceImpl implements UserService {
 
     public UserDto createUser(UserDto userDto) {
         User user = toUser(userDto);
-        return toUserDto(userRepository.save(user));
+        User user1 = userRepository.save(user);
+        UserDto userDto1 = toUserDto(user1);
+        return userDto1;
     }
 
     public UserDto updateUser(int id, UserDto userDto) {
@@ -34,7 +36,8 @@ public class UserServiceImpl implements UserService {
             if (user.getEmail() != null) {
                 updatedUser.setEmail(user.getEmail());
             }
-            return toUserDto(userRepository.save(updatedUser));
+            user = userRepository.save(updatedUser);
+            return toUserDto(user);
         } else {
             throw new NotFoundException("Update User not found");
         }

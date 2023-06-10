@@ -1,5 +1,8 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
@@ -111,8 +114,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemOutputDto> getItemsByOwner(int ownerId) {
-        Collection<Item> items = itemRepository.searchByOwner(ownerId);
+    public Collection<ItemOutputDto> getItemsByOwner(int ownerId, Integer from, Integer size) {
+        Collection<Item> items;
+        if (from != null && size != null) {
+            if (from >= 0 && size > 0) {
+                Pageable pageable = PageRequest.of(0, from + size, Sort.by("id").descending());
+                items = itemRepository.searchByOwner(pageable, ownerId).stream()
+                        .skip(from)
+                        .collect(Collectors.toList());
+            } else {
+                throw new WrongCommandException("Неправильный запрос from и size");
+            }
+
+        } else {
+            items = itemRepository.searchByOwner(ownerId);
+        }
         Collection<Booking> bookings = bookingRepository.findByOwner(ownerId);
         Collection<ItemOutputDto> itemsWithBooking = new ArrayList<>();
         for (Item item : items) {
@@ -129,14 +145,32 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> searchItemsByText(String text) {
-        if (text.length() > 0) {
-            text = text.toLowerCase();
-            return itemRepository.search(text).stream()
-                    .map(ItemMapper::toItemDto)
-                    .collect(Collectors.toList());
+    public Collection<ItemDto> searchItemsByText(String text, Integer from, Integer size) {
+        if (from != null && size != null) {
+            if (from >= 0 && size > 0) {
+                if (text.length() > 0) {
+                    text = text.toLowerCase();
+                    Pageable pageable = PageRequest.of(0, from + size,
+                            Sort.by("id").descending());
+                    return itemRepository.search(pageable, text).stream()
+                            .skip(from)
+                            .map(ItemMapper::toItemDto)
+                            .collect(Collectors.toList());
+                } else {
+                    return new ArrayList<>();
+                }
+            } else {
+                throw new WrongCommandException("Неправильный запрос from и size");
+            }
         } else {
-            return new ArrayList<>();
+            if (text.length() > 0) {
+                text = text.toLowerCase();
+                return itemRepository.search(text).stream()
+                        .map(ItemMapper::toItemDto)
+                        .collect(Collectors.toList());
+            } else {
+                return new ArrayList<>();
+            }
         }
     }
 

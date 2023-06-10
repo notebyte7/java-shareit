@@ -1,5 +1,8 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
@@ -115,29 +118,65 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingOutputDto> getBookingByUser(int userId, State state) {
+    public List<BookingOutputDto> getBookingByUser(int userId, State state, Integer from, Integer size) {
         if (userRepository.existsById(userId)) {
-            if (state.equals(State.ALL)) {
-                return bookingRepository.findAllByBookerIdOrderByStartDesc(userId).stream()
-                        .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-            } else if (state.equals(State.CURRENT)) {
-                return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(),
-                                LocalDateTime.now()).stream()
-                        .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-            } else if (state.equals(State.PAST)) {
-                return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
-                        .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-            } else if (state.equals(State.FUTURE)) {
-                return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()).stream()
-                        .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-            } else if (state.equals(State.WAITING)) {
-                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
-                        .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-            } else if (state.equals(State.REJECTED)) {
-                return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
-                        .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+            if (from != null && size != null) {
+                if (from >= 0 && size > 0) {
+                    Pageable pageable = PageRequest.of(0, from + size, Sort.by("id").descending());
+                    if (state.equals(State.ALL)) {
+                        return bookingRepository.findAllByBookerIdOrderByStartDesc(pageable, userId).stream()
+                                .skip(from)
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.CURRENT)) {
+                        return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(pageable, userId, LocalDateTime.now(),
+                                        LocalDateTime.now()).stream()
+                                .skip(from)
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.PAST)) {
+                        return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(pageable, userId, LocalDateTime.now()).stream()
+                                .skip(from)
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.FUTURE)) {
+                        return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(pageable, userId, LocalDateTime.now()).stream()
+                                .skip(from)
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.WAITING)) {
+                        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.WAITING).stream()
+                                .skip(from)
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.REJECTED)) {
+                        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.REJECTED).stream()
+                                .skip(from)
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else {
+                        throw new WrongStateException(String.format("Unknown state: %s", state));
+                    }
+                } else {
+                    throw new WrongCommandException("Неправильный запрос from и size");
+                }
             } else {
-                throw new WrongStateException(String.format("Unknown state: %s", state));
+                if (state.equals(State.ALL)) {
+                    return bookingRepository.findAllByBookerIdOrderByStartDesc(userId).stream()
+                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else if (state.equals(State.CURRENT)) {
+                    return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(),
+                                    LocalDateTime.now()).stream()
+                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else if (state.equals(State.PAST)) {
+                    return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else if (state.equals(State.FUTURE)) {
+                    return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else if (state.equals(State.WAITING)) {
+                    return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
+                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else if (state.equals(State.REJECTED)) {
+                    return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
+                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else {
+                    throw new WrongStateException(String.format("Unknown state: %s", state));
+                }
             }
         } else {
             throw new NotFoundException("Пользователя не существует");
@@ -145,30 +184,66 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingOutputDto> getBookingByOwner(int userId, State state) {
+    public List<BookingOutputDto> getBookingByOwner(int userId, State state, Integer from, Integer size) {
         if (userRepository.existsById(userId)) {
             if (itemRepository.findByOwner_Id(userId).size() > 0) {
-                if (state.equals(State.ALL)) {
-                    return bookingRepository.findByItemOwnerIdOrderByStartDesc(userId).stream()
-                            .map(BookingMapper::toBookingDtoWithItemAndBooker)
-                            .collect(Collectors.toList());
-                } else if (state.equals(State.CURRENT)) {
-                    return bookingRepository.findCurrentByOwner(userId, LocalDateTime.now()).stream()
-                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else if (state.equals(State.PAST)) {
-                    return bookingRepository.findBookingsByOwnItemByUserAndPast(userId, LocalDateTime.now()).stream()
-                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else if (state.equals(State.FUTURE)) {
-                    return bookingRepository.findBookingsByOwnItemByUserAndFuture(userId, LocalDateTime.now()).stream()
-                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else if (state.equals(State.WAITING)) {
-                    return bookingRepository.findBookingsByOwnItemByUserAndStatus(userId, Status.WAITING).stream()
-                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else if (state.equals(State.REJECTED)) {
-                    return bookingRepository.findBookingsByOwnItemByUserAndStatus(userId, Status.REJECTED).stream()
-                            .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                if (from != null && size != null) {
+                    if (from >= 0 && size > 0) {
+                        Pageable pageable = PageRequest.of(0, from + size, Sort.by("id").descending());
+                        if (state.equals(State.ALL)) {
+                            return bookingRepository.findByItemOwnerIdOrderByStartDesc(pageable, userId).stream()
+                                    .skip(from)
+                                    .map(BookingMapper::toBookingDtoWithItemAndBooker)
+                                    .collect(Collectors.toList());
+                        } else if (state.equals(State.CURRENT)) {
+                            return bookingRepository.findCurrentByOwner(pageable, userId, LocalDateTime.now()).stream()
+                                    .skip(from)
+                                    .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                        } else if (state.equals(State.PAST)) {
+                            return bookingRepository.findBookingsByOwnItemByUserAndPast(pageable, userId, LocalDateTime.now()).stream()
+                                    .skip(from)
+                                    .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                        } else if (state.equals(State.FUTURE)) {
+                            return bookingRepository.findBookingsByOwnItemByUserAndFuture(pageable, userId, LocalDateTime.now()).stream()
+                                    .skip(from)
+                                    .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                        } else if (state.equals(State.WAITING)) {
+                            return bookingRepository.findBookingsByOwnItemByUserAndStatus(pageable, userId, Status.WAITING).stream()
+                                    .skip(from)
+                                    .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                        } else if (state.equals(State.REJECTED)) {
+                            return bookingRepository.findBookingsByOwnItemByUserAndStatus(pageable, userId, Status.REJECTED).stream()
+                                    .skip(from)
+                                    .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                        } else {
+                            throw new WrongStateException(String.format("Unknown state: %s", state));
+                        }
+                    } else {
+                        throw new WrongCommandException("Неправильный запрос from и size");
+                    }
                 } else {
-                    throw new WrongStateException(String.format("Unknown state: %s", state));
+                    if (state.equals(State.ALL)) {
+                        return bookingRepository.findByItemOwnerIdOrderByStartDesc(userId).stream()
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker)
+                                .collect(Collectors.toList());
+                    } else if (state.equals(State.CURRENT)) {
+                        return bookingRepository.findCurrentByOwner(userId, LocalDateTime.now()).stream()
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.PAST)) {
+                        return bookingRepository.findBookingsByOwnItemByUserAndPast(userId, LocalDateTime.now()).stream()
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.FUTURE)) {
+                        return bookingRepository.findBookingsByOwnItemByUserAndFuture(userId, LocalDateTime.now()).stream()
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.WAITING)) {
+                        return bookingRepository.findBookingsByOwnItemByUserAndStatus(userId, Status.WAITING).stream()
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else if (state.equals(State.REJECTED)) {
+                        return bookingRepository.findBookingsByOwnItemByUserAndStatus(userId, Status.REJECTED).stream()
+                                .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else {
+                        throw new WrongStateException(String.format("Unknown state: %s", state));
+                    }
                 }
             } else {
                 throw new NotFoundException("Нет таких вещей");

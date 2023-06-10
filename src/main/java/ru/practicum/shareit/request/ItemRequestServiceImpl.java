@@ -69,17 +69,19 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public Collection<ItemRequestDto> getRequestsAll(int userId, Integer from, Integer size) {
-        if (from == null && size == null) {
-            return new ArrayList<>();
-        } else if (from >= 0 && size > 0) {
-            Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
-            return requestRepository.findAll(pageable).getContent().stream()
-                    .filter(itemRequest -> itemRequest.getRequestor().getId() != userId)
-                    .map(ItemRequestMapper::toItemRequestDto)
-                    .collect(Collectors.toList());
+        if (from != null && size != null) {
+            if (from >= 0 && size > 0) {
+                Pageable pageable = PageRequest.of(0, from + size, Sort.by("created").descending());
+                return requestRepository.findAll(pageable).getContent().stream()
+                        .skip(from)
+                        .filter(itemRequest -> itemRequest.getRequestor().getId() != userId)
+                        .map(ItemRequestMapper::toItemRequestDto)
+                        .collect(Collectors.toList());
+            } else {
+                throw new WrongCommandException("Неправильный запрос from и size");
+            }
         } else {
-            throw new WrongCommandException("Неправильный запрос from и size");
+            return new ArrayList<>();
         }
-
     }
 }
