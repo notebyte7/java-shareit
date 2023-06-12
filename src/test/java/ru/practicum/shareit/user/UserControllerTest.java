@@ -71,18 +71,18 @@ class UserControllerTest {
         when(userService.updateUser(anyInt(), any(UserDto.class)))
                 .thenReturn(userDtoUpdated);
 
-        mvc.perform(patch("/users/{id}", 1)
-                        .content(mapper.writeValueAsString(userDto))
+        mvc.perform(patch("/users/{userId}", 1)
+                        .content(mapper.writeValueAsString(userDtoUpdated))
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(userDto.getId()), Integer.class))
-                .andExpect(jsonPath("$.name", is("New User")))
-                .andExpect(jsonPath("$.email", is("new@user.ru")));
+                .andExpect(jsonPath("$.id", is(userDtoUpdated.getId())))
+                .andExpect(jsonPath("$.name", is(userDtoUpdated.getName())))
+                .andExpect(jsonPath("$.email", is(userDtoUpdated.getEmail())));
 
         Mockito.verify(userService, Mockito.times(1))
-                .updateUser(1, userDto);
+                .updateUser(1, userDtoUpdated);
     }
 
     @Test

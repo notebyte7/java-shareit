@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,8 +48,6 @@ class UserServiceImplTest {
 
     @Test
     void updateUser() {
-
-
         updatedUser = new User(1, "newuser", "newuser@user.ru");
         UserDto updatedUserDto = UserMapper.toUserDto(updatedUser);
 
@@ -68,6 +65,9 @@ class UserServiceImplTest {
                 .findById(anyInt());
         Mockito.verify(userRepository, Mockito.times(1))
                 .save(any(User.class));
+
+        assertThrows(NotFoundException.class,
+                () -> userService.updateUser(99, updatedUserDto));
     }
 
     @Test
@@ -102,8 +102,7 @@ class UserServiceImplTest {
 
     @Test
     void deleteUser() {
-        doNothing()
-                .when(userRepository).deleteById(anyInt());
+        when(userRepository.existsById(anyInt())).thenReturn(true);
         userService.deleteUser(anyInt());
         Mockito.verify(userRepository, Mockito.times(1))
                 .deleteById(anyInt());

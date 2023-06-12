@@ -44,8 +44,9 @@ public class BookingServiceImpl implements BookingService {
                     if (booking.getItem().getAvailable().equals(true)) {
                         if (booking.getStart().isAfter(LocalDateTime.now()) && booking.getStart().isBefore(booking.getEnd())
                                 && !booking.getStart().isEqual(booking.getEnd())) {
-                            booking.setStatus(Status.WAITING);
-
+                            if (booking.getStatus() == null) {
+                                booking.setStatus(Status.WAITING);
+                            }
                             return toBookingDtoWithItemAndBooker(bookingRepository.save(booking));
                         } else {
                             throw new WrongCommandException("Неправильно задано время начала и(или) конца бронированию");

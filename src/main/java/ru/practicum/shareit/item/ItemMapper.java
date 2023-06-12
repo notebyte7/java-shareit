@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class ItemMapper {
@@ -53,9 +54,9 @@ public class ItemMapper {
                 item.getOwner().getId(),
                 lastBooking,
                 nextBooking,
-                item.getComment().stream()
+                item.getComment() != null ? item.getComment().stream()
                         .map(CommentMapper::toCommentWithName)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()) : new ArrayList<>()
         );
     }
 }
