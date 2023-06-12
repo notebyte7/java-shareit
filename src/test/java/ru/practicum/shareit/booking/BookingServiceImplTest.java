@@ -13,6 +13,7 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.WrongCommandException;
+import ru.practicum.shareit.exeption.WrongStateException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -246,8 +247,11 @@ class BookingServiceImplTest {
         bookings = bookingService.getBookingByOwner(owner.getId(), State.REJECTED, null, null);
         assertThat(bookings, hasSize(0));
 
-        assertThrows(WrongCommandException.class,
-                () -> bookingService.getBookingByUser(booker.getId(), State.ALL, 0, 0));
+        assertThrows(NotFoundException.class,
+                () -> bookingService.getBookingByOwner(booker.getId(), State.ALL, 0, 0));
+
+        assertThrows(WrongStateException.class,
+                () -> bookingService.getBookingByOwner(owner.getId(), State.valueOf("AAA"), 0, 10));
 
     }
 
