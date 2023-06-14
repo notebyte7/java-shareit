@@ -6,7 +6,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.WrongCommandException;
-import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
@@ -24,13 +23,10 @@ import static ru.practicum.shareit.request.ItemRequestMapper.toItemRequestDto;
 public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestRepository requestRepository;
     private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
 
-    public ItemRequestServiceImpl(ItemRequestRepository requestRepository, UserRepository userRepository,
-                                  ItemRepository itemRepository) {
+    public ItemRequestServiceImpl(ItemRequestRepository requestRepository, UserRepository userRepository) {
         this.requestRepository = requestRepository;
         this.userRepository = userRepository;
-        this.itemRepository = itemRepository;
     }
 
     @Override
@@ -56,11 +52,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public ItemRequestDto getRequests(int userId, int requestId) {
         if (userRepository.findById(userId).isPresent()) {
-            if (requestRepository.findById(requestId).isPresent()) {
-                return toItemRequestDto(requestRepository.findById(requestId).get());
-            } else {
-                throw new NotFoundException("Request не существует");
-            }
+            ItemRequest request = requestRepository.findById(requestId)
+                    .orElseThrow((NotFoundException::new));
+            return toItemRequestDto(request);
+
 
         } else {
             throw new NotFoundException("Пользователь не существует");
@@ -71,10 +66,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     public Collection<ItemRequestDto> getRequestsAll(int userId, Integer from, Integer size) {
         if (from != null && size != null) {
             if (from >= 0 && size > 0) {
-                Pageable pageable = PageRequest.of(0, from + size, Sort.by("created").descending());
-                return requestRepository.findAll(pageable).getContent().stream()
-                        .skip(from)
-                        .filter(itemRequest -> itemRequest.getRequestor().getId() != userId)
+                Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
+                return requestRepository.findByRequestorIdNotOrderByCreatedDesc(userId, pageable).getContent().stream()
                         .map(ItemRequestMapper::toItemRequestDto)
                         .collect(Collectors.toList());
             } else {

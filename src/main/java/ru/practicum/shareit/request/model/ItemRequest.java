@@ -31,7 +31,6 @@ public class ItemRequest {
     User requestor;
     LocalDateTime created;
     @OneToMany(mappedBy = "request", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    //@JsonBackReference
     List<Item> items;
 
     public ItemRequest(int id, String description, User requestor, LocalDateTime created) {

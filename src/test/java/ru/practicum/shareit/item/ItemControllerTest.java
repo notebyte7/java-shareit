@@ -39,7 +39,7 @@ class ItemControllerTest {
     @Autowired
     ObjectMapper mapper;
     @MockBean
-    ItemServiceImpl itemService;
+    ItemService itemService;
     @Autowired
     MockMvc mvc;
     ItemDto itemDto;

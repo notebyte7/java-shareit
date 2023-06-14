@@ -37,7 +37,7 @@ class ItemRequestControllerTest {
     @Autowired
     ObjectMapper mapper;
     @MockBean
-    ItemRequestServiceImpl itemRequestService;
+    ItemRequestService itemRequestService;
     @Autowired
     MockMvc mvc;
     ItemRequest request;

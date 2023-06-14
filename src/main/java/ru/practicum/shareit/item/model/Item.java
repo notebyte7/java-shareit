@@ -34,8 +34,6 @@ public class Item {
     private User owner;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "request_id")
-    //@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,
-    //       property = "id")
     private ItemRequest request;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)

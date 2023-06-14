@@ -11,7 +11,7 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Integer> {
     List<Item> findByRequestId(int id);
 
-    List<Item> findByOwner_Id(Integer id);
+    List<Item> findByOwnerId(Integer id);
 
     @Query(" select i " +
             "from Item i " +
@@ -37,6 +37,6 @@ public interface ItemRepository extends JpaRepository<Item, Integer> {
 
     @Query("select i.id from Item i " +
             "where i.owner.id = ?1 ")
-    List<Integer> searchItem_IdByOwner(int ownerId, LocalDateTime now);
+    List<Integer> searchItemIdByOwner(int ownerId, LocalDateTime now);
 
 }

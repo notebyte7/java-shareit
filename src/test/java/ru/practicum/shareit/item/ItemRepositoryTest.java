@@ -72,7 +72,7 @@ class ItemRepositoryTest {
 
     @Test
     void findByOwner_Id() {
-        List<Item> items = itemRepository.findByOwner_Id(owner.getId());
+        List<Item> items = itemRepository.findByOwnerId(owner.getId());
         Item receivedItem = items.get(0);
 
         assertThat(items.size(), equalTo(1));

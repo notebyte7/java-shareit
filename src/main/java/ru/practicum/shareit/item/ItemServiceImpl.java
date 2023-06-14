@@ -53,18 +53,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createItem(int userId, ItemDto itemDto) {
-        if (userRepository.findById(userId).isPresent()) {
-            User owner = userRepository.findById(userId).get();
-            ItemRequest itemRequest = null;
-            if (itemDto.getRequestId() != null) {
-                int requestId = itemDto.getRequestId();
-                itemRequest = requestRepository.findById(requestId).get();
-            }
-            Item item = toItem(itemDto, owner, itemRequest);
-            return toItemDto(itemRepository.save(item));
-        } else {
-            throw new NotFoundException("User not found");
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User не существует"));
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            int requestId = itemDto.getRequestId();
+            itemRequest = requestRepository.findById(requestId).get();
         }
+        Item item = toItem(itemDto, owner, itemRequest);
+        return toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -94,22 +91,19 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemOutputDto getItemDtoById(int userId, int itemId) {
-        if (itemRepository.findById(itemId).isPresent()) {
-            Item item = itemRepository.findById(itemId).get();
-            if (item.getOwner().getId() == userId) {
-                Collection<Booking> bookings = bookingRepository.findBookingsByItemId(itemId);
-                BookingShortDto lastBooking = null;
-                BookingShortDto nextBooking = null;
-                if (bookings.size() != 0) {
-                    lastBooking = getLastBooking(bookings, itemId);
-                    nextBooking = getNextBooking(bookings, itemId);
-                }
-                return toItemWithBooking(item, lastBooking, nextBooking);
-            } else {
-                return toItemWithBooking(item, null, null);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item не существует"));
+        if (item.getOwner().getId() == userId) {
+            Collection<Booking> bookings = bookingRepository.findBookingsByItemId(itemId);
+            BookingShortDto lastBooking = null;
+            BookingShortDto nextBooking = null;
+            if (bookings.size() != 0) {
+                lastBooking = getLastBooking(bookings, itemId);
+                nextBooking = getNextBooking(bookings, itemId);
             }
+            return toItemWithBooking(item, lastBooking, nextBooking);
         } else {
-            throw new NotFoundException("Item not found");
+            return toItemWithBooking(item, null, null);
         }
     }
 
@@ -118,10 +112,8 @@ public class ItemServiceImpl implements ItemService {
         Collection<Item> items;
         if (from != null && size != null) {
             if (from >= 0 && size > 0) {
-                Pageable pageable = PageRequest.of(0, from + size, Sort.by("id").descending());
-                items = itemRepository.searchByOwner(pageable, ownerId).stream()
-                        .skip(from)
-                        .collect(Collectors.toList());
+                Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").descending());
+                items = itemRepository.searchByOwner(pageable, ownerId);
             } else {
                 throw new WrongCommandException("Неправильный запрос from и size");
             }
@@ -150,10 +142,9 @@ public class ItemServiceImpl implements ItemService {
             if (from >= 0 && size > 0) {
                 if (text.length() > 0) {
                     text = text.toLowerCase();
-                    Pageable pageable = PageRequest.of(0, from + size,
+                    Pageable pageable = PageRequest.of(from / size, size,
                             Sort.by("id").descending());
                     return itemRepository.search(pageable, text).stream()
-                            .skip(from)
                             .map(ItemMapper::toItemDto)
                             .collect(Collectors.toList());
                 } else {

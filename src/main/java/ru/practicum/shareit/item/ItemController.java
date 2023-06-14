@@ -15,9 +15,9 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/items")
 public class ItemController {
-    private final ItemServiceImpl itemService;
+    private final ItemService itemService;
 
-    public ItemController(ItemServiceImpl itemService) {
+    public ItemController(ItemService itemService) {
         this.itemService = itemService;
     }
 

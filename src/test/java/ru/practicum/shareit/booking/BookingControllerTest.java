@@ -40,7 +40,7 @@ class BookingControllerTest {
     @Autowired
     ObjectMapper mapper;
     @MockBean
-    BookingServiceImpl bookingService;
+    BookingService bookingService;
     @Autowired
     MockMvc mvc;
     BookingDto bookingDto;

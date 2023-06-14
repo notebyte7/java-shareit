@@ -33,9 +33,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         properties = "db.name=test",
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class BookingServiceImplTest {
+class BookingServiceIntegrationTest {
     final EntityManager entityManager;
-    final BookingServiceImpl bookingService;
+    final BookingService bookingService;
     User owner;
     User booker;
     Item item;
@@ -55,7 +55,10 @@ class BookingServiceImplTest {
         item.setAvailable(true);
         entityManager.persist(item);
         entityManager.flush();
+    }
 
+    @Test
+    void createBooking() {
         firstBooking = bookingService.createBooking(
                 booker.getId(),
                 setBookingDto(
@@ -69,14 +72,11 @@ class BookingServiceImplTest {
                         item.getId(),
                         LocalDateTime.of(2023, Month.JULY, 1, 12, 0, 0),
                         LocalDateTime.of(2023, Month.JULY, 2, 12, 0, 0)));
-    }
 
-    @Test
-    void createBooking() {
         assertThat(firstBooking.getId(), notNullValue());
         assertThat(firstBooking.getStart(), equalTo(LocalDateTime.of(2023, Month.JUNE, 15, 12, 0, 0)));
         assertThat(firstBooking.getEnd(), equalTo(LocalDateTime.of(2023, Month.JUNE, 20, 12, 0, 0)));
-        assertThat(firstBooking.getStatus().toString(), equalTo("WAITING"));
+        assertThat(firstBooking.getStatus().toString(), equalTo(Status.WAITING.toString()));
         assertThat(firstBooking.getBooker().getId(), equalTo(booker.getId()));
         assertThat(firstBooking.getItem().getId(), equalTo(item.getId()));
 
@@ -99,21 +99,35 @@ class BookingServiceImplTest {
 
     @Test
     void approvingBooking() {
+        firstBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JUNE, 15, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JUNE, 20, 12, 0, 0)));
+
+        secondBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JULY, 1, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JULY, 2, 12, 0, 0)));
+
         BookingOutputDto booking = bookingService.getBookingById(booker.getId(), firstBooking.getId());
 
-        assertThat(booking.getStatus().toString(), equalTo("WAITING"));
+        assertThat(booking.getStatus().toString(), equalTo(Status.WAITING.toString()));
 
         bookingService.approvingBooking(owner.getId(), firstBooking.getId(), true);
         booking = bookingService.getBookingById(booker.getId(), firstBooking.getId());
 
-        assertThat(booking.getStatus().toString(), equalTo("APPROVED"));
+        assertThat(booking.getStatus().toString(), equalTo(Status.APPROVED.toString()));
 
         assertThrows(WrongCommandException.class,
                 () -> bookingService.approvingBooking(owner.getId(), firstBooking.getId(), true));
 
         bookingService.approvingBooking(owner.getId(), firstBooking.getId(), false);
         booking = bookingService.getBookingById(booker.getId(), firstBooking.getId());
-        assertThat(booking.getStatus().toString(), equalTo("REJECTED"));
+        assertThat(booking.getStatus().toString(), equalTo(Status.REJECTED.toString()));
 
         assertThrows(WrongCommandException.class,
                 () -> bookingService.approvingBooking(owner.getId(), firstBooking.getId(), false));
@@ -128,6 +142,20 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingById() {
+        firstBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JUNE, 15, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JUNE, 20, 12, 0, 0)));
+
+        secondBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JULY, 1, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JULY, 2, 12, 0, 0)));
+
         BookingOutputDto booking = bookingService.getBookingById(booker.getId(), firstBooking.getId());
 
         assertThat(booking.getId(), equalTo(firstBooking.getId()));
@@ -140,6 +168,20 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingByUser() {
+        firstBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JUNE, 15, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JUNE, 20, 12, 0, 0)));
+
+        secondBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JULY, 1, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JULY, 2, 12, 0, 0)));
+
         BookingOutputDto receivedBooking = bookingService.getBookingById(booker.getId(), secondBooking.getId());
 
         assertThat(receivedBooking.getId(), equalTo(secondBooking.getId()));
@@ -204,6 +246,20 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingByOwner() {
+        firstBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JUNE, 15, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JUNE, 20, 12, 0, 0)));
+
+        secondBooking = bookingService.createBooking(
+                booker.getId(),
+                setBookingDto(
+                        item.getId(),
+                        LocalDateTime.of(2023, Month.JULY, 1, 12, 0, 0),
+                        LocalDateTime.of(2023, Month.JULY, 2, 12, 0, 0)));
+
         List<BookingOutputDto> bookings = bookingService.getBookingByOwner(owner.getId(), State.ALL, 0, 10);
 
         assertThat(bookings, hasSize(2));

@@ -54,42 +54,42 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
             "join b.item as i " +
             "where i.owner.id = ?1 and b.end < ?2 " +
             "order by b.start desc ")
-    List<Booking> findBookingsByOwnItemByUserAndPast(int userId, LocalDateTime time);
+    List<Booking> findBookingsByOwnerInPast(int userId, LocalDateTime time);
 
     @Query("select b " +
             "from Booking as b " +
             "join b.item as i " +
             "where i.owner.id = ?1 and b.end < ?2 " +
             "order by b.start desc ")
-    List<Booking> findBookingsByOwnItemByUserAndPast(Pageable pageable, int userId, LocalDateTime time);
+    List<Booking> findBookingsByOwnerInPast(Pageable pageable, int userId, LocalDateTime time);
 
     @Query("select b " +
             "from Booking as b " +
             "join b.item as i " +
             "where i.owner.id = ?1 and b.start > ?2 " +
             "order by b.start desc ")
-    List<Booking> findBookingsByOwnItemByUserAndFuture(int userId, LocalDateTime time);
+    List<Booking> findBookingsByOwnerInFuture(int userId, LocalDateTime time);
 
     @Query("select b " +
             "from Booking as b " +
             "join b.item as i " +
             "where i.owner.id = ?1 and b.start > ?2 " +
             "order by b.start desc ")
-    List<Booking> findBookingsByOwnItemByUserAndFuture(Pageable pageable, int userId, LocalDateTime time);
+    List<Booking> findBookingsByOwnerInFuture(Pageable pageable, int userId, LocalDateTime time);
 
     @Query("select b " +
             "from Booking as b " +
             "join b.item as i " +
             "where i.owner.id = ?1 and b.status = ?2 " +
             "order by b.start desc ")
-    List<Booking> findBookingsByOwnItemByUserAndStatus(int userId, Status status);
+    List<Booking> findBookingsByOwnerAndStatus(int userId, Status status);
 
     @Query("select b " +
             "from Booking as b " +
             "join b.item as i " +
             "where i.owner.id = ?1 and b.status = ?2 " +
             "order by b.start desc ")
-    List<Booking> findBookingsByOwnItemByUserAndStatus(Pageable pageable, int userId, Status status);
+    List<Booking> findBookingsByOwnerAndStatus(Pageable pageable, int userId, Status status);
 
     @Query("select b " +
             "from Booking as b " +

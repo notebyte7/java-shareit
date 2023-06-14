@@ -29,10 +29,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
         webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @PersistenceContext
-class ItemRequestServiceImplTest {
+class ItemRequestServiceIntegrationTest {
 
     final EntityManager em;
-    final ItemRequestServiceImpl itemRequestService;
+    final ItemRequestService itemRequestService;
     User owner;
     User requester;
     ItemRequestDto request;

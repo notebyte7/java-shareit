@@ -12,9 +12,9 @@ import java.util.Collection;
 @RestController
 @RequestMapping(path = "/requests")
 public class ItemRequestController {
-    private final ItemRequestServiceImpl requestService;
+    private final ItemRequestService requestService;
 
-    public ItemRequestController(ItemRequestServiceImpl requestService) {
+    public ItemRequestController(ItemRequestService requestService) {
         this.requestService = requestService;
     }
 
