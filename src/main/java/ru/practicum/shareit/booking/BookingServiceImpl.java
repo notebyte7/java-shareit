@@ -132,10 +132,12 @@ public class BookingServiceImpl implements BookingService {
                         return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(pageable, userId, LocalDateTime.now()).stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                     } else if (state.equals(State.WAITING)) {
-                        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.WAITING).stream()
+                        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.WAITING)
+                                .stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                     } else if (state.equals(State.REJECTED)) {
-                        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.REJECTED).stream()
+                        return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.REJECTED)
+                                .stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                     } else {
                         throw new WrongStateException(String.format("Unknown state: %s", state));
@@ -148,14 +150,16 @@ public class BookingServiceImpl implements BookingService {
                     return bookingRepository.findAllByBookerIdOrderByStartDesc(userId).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                 } else if (state.equals(State.CURRENT)) {
-                    return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(),
-                                    LocalDateTime.now()).stream()
+                    return bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId,
+                                    LocalDateTime.now(), LocalDateTime.now()).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                 } else if (state.equals(State.PAST)) {
-                    return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                    return bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now())
+                            .stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                 } else if (state.equals(State.FUTURE)) {
-                    return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()).stream()
+                    return bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now())
+                            .stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                 } else if (state.equals(State.WAITING)) {
                     return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
@@ -178,7 +182,8 @@ public class BookingServiceImpl implements BookingService {
             if (itemRepository.findByOwnerId(userId).size() > 0) {
                 if (from != null && size != null) {
                     if (from >= 0 && size > 0) {
-                        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").descending());
+                        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id")
+                                .descending());
                         if (state.equals(State.ALL)) {
                             return bookingRepository.findByItemOwnerIdOrderByStartDesc(pageable, userId).stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker)
@@ -187,16 +192,20 @@ public class BookingServiceImpl implements BookingService {
                             return bookingRepository.findCurrentByOwner(pageable, userId, LocalDateTime.now()).stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                         } else if (state.equals(State.PAST)) {
-                            return bookingRepository.findBookingsByOwnerInPast(pageable, userId, LocalDateTime.now()).stream()
+                            return bookingRepository.findBookingsByOwnerInPast(pageable, userId, LocalDateTime.now())
+                                    .stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                         } else if (state.equals(State.FUTURE)) {
-                            return bookingRepository.findBookingsByOwnerInFuture(pageable, userId, LocalDateTime.now()).stream()
+                            return bookingRepository.findBookingsByOwnerInFuture(pageable, userId, LocalDateTime.now())
+                                    .stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                         } else if (state.equals(State.WAITING)) {
-                            return bookingRepository.findBookingsByOwnerAndStatus(pageable, userId, Status.WAITING).stream()
+                            return bookingRepository.findBookingsByOwnerAndStatus(pageable, userId, Status.WAITING)
+                                    .stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                         } else if (state.equals(State.REJECTED)) {
-                            return bookingRepository.findBookingsByOwnerAndStatus(pageable, userId, Status.REJECTED).stream()
+                            return bookingRepository.findBookingsByOwnerAndStatus(pageable, userId, Status.REJECTED)
+                                    .stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
                         } else {
                             throw new WrongStateException(String.format("Unknown state: %s", state));
