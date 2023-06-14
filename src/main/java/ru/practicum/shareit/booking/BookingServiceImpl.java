@@ -68,8 +68,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingOutputDto approvingBooking(int userId, int bookingId, boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId).
-                orElseThrow(() -> new NotFoundException("Бронирования с таким id не существует"));
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new NotFoundException("Бронирования с таким id не существует"));
         if (booking.getItem() != null) {
             Item item = booking.getItem();
             if (item.getOwner().getId() == userId) {
