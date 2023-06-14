@@ -15,9 +15,9 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/bookings")
 public class BookingController {
-    private final BookingServiceImpl bookingService;
+    private final BookingService bookingService;
 
-    public BookingController(BookingServiceImpl bookingService) {
+    public BookingController(BookingService bookingService) {
         this.bookingService = bookingService;
     }
 
@@ -43,25 +43,29 @@ public class BookingController {
     @GetMapping()
     @ResponseBody
     List<BookingOutputDto> getBookingByUser(@RequestHeader(value = "X-Sharer-User-Id", required = false) int userId,
-                                            @RequestParam(defaultValue = "ALL", required = false) String state) {
+                                            @RequestParam(defaultValue = "ALL", required = false) String state,
+                                            @RequestParam(required = false) Integer from, Integer size) {
         State stateEnum;
         try {
             stateEnum = State.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new WrongStateException(String.format("Unknown state: %s", state));
         }
-        return bookingService.getBookingByUser(userId, stateEnum);
+        return bookingService.getBookingByUser(userId, stateEnum, from, size);
     }
 
     @GetMapping("/owner")
     @ResponseBody
     List<BookingOutputDto> getBookingByOwner(@RequestHeader(value = "X-Sharer-User-Id", required = false) int userId,
-                                             @RequestParam(defaultValue = "ALL", required = false) String state) {
+                                             @RequestParam(defaultValue = "ALL", required = false) String state,
+                                             @RequestParam(required = false) Integer from, Integer size) {
+        State stateStatus;
         try {
-            return bookingService.getBookingByOwner(userId, State.valueOf(state));
+            stateStatus = State.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new WrongStateException(String.format("Unknown state: %s", state));
         }
+        return bookingService.getBookingByOwner(userId, stateStatus, from, size);
     }
 
     @ExceptionHandler(WrongStateException.class)

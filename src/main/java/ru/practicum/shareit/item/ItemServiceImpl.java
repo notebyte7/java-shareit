@@ -1,5 +1,8 @@
 package ru.practicum.shareit.item;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.dto.BookingShortDto;
@@ -14,6 +17,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemOutputDto;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -34,25 +39,29 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository requestRepository;
 
     public ItemServiceImpl(ItemRepository itemRepository, UserRepository userRepository,
                            BookingRepository bookingRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository, ItemRequestRepository requestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.requestRepository = requestRepository;
     }
 
     @Override
     public ItemDto createItem(int userId, ItemDto itemDto) {
-        if (userRepository.findById(userId).isPresent()) {
-            User owner = userRepository.findById(userId).get();
-            Item item = toItem(itemDto, owner);
-            return toItemDto(itemRepository.save(item));
-        } else {
-            throw new NotFoundException("User not found");
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User не существует"));
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            int requestId = itemDto.getRequestId();
+            itemRequest = requestRepository.findById(requestId).get();
         }
+        Item item = toItem(itemDto, owner, itemRequest);
+        return toItemDto(itemRepository.save(item));
     }
 
     @Override
@@ -82,28 +91,36 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemOutputDto getItemDtoById(int userId, int itemId) {
-        if (itemRepository.findById(itemId).isPresent()) {
-            Item item = itemRepository.findById(itemId).get();
-            if (item.getOwner().getId() == userId) {
-                Collection<Booking> bookings = bookingRepository.findBookingsByItemId(itemId);
-                BookingShortDto lastBooking = null;
-                BookingShortDto nextBooking = null;
-                if (bookings.size() != 0) {
-                    lastBooking = getLastBooking(bookings, itemId);
-                    nextBooking = getNextBooking(bookings, itemId);
-                }
-                return toItemWithBooking(item, lastBooking, nextBooking);
-            } else {
-                return toItemWithBooking(item, null, null);
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Item не существует"));
+        if (item.getOwner().getId() == userId) {
+            Collection<Booking> bookings = bookingRepository.findBookingsByItemId(itemId);
+            BookingShortDto lastBooking = null;
+            BookingShortDto nextBooking = null;
+            if (bookings.size() != 0) {
+                lastBooking = getLastBooking(bookings, itemId);
+                nextBooking = getNextBooking(bookings, itemId);
             }
+            return toItemWithBooking(item, lastBooking, nextBooking);
         } else {
-            throw new NotFoundException("Item not found");
+            return toItemWithBooking(item, null, null);
         }
     }
 
     @Override
-    public Collection<ItemOutputDto> getItemsByOwner(int ownerId) {
-        Collection<Item> items = itemRepository.searchByOwner(ownerId);
+    public Collection<ItemOutputDto> getItemsByOwner(int ownerId, Integer from, Integer size) {
+        Collection<Item> items;
+        if (from != null && size != null) {
+            if (from >= 0 && size > 0) {
+                Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").descending());
+                items = itemRepository.searchByOwner(pageable, ownerId);
+            } else {
+                throw new WrongCommandException("Неправильный запрос from и size");
+            }
+
+        } else {
+            items = itemRepository.searchByOwner(ownerId);
+        }
         Collection<Booking> bookings = bookingRepository.findByOwner(ownerId);
         Collection<ItemOutputDto> itemsWithBooking = new ArrayList<>();
         for (Item item : items) {
@@ -115,21 +132,36 @@ public class ItemServiceImpl implements ItemService {
             }
             ItemOutputDto itemWithBookings = toItemWithBooking(item, lastBooking, nextBooking);
             itemsWithBooking.add(itemWithBookings);
-
-
         }
         return itemsWithBooking;
     }
 
     @Override
-    public Collection<ItemDto> searchItemsByText(String text) {
-        if (text.length() > 0) {
-            text = text.toLowerCase();
-            return itemRepository.search(text).stream()
-                    .map(ItemMapper::toItemDto)
-                    .collect(Collectors.toList());
+    public Collection<ItemDto> searchItemsByText(String text, Integer from, Integer size) {
+        if (from != null && size != null) {
+            if (from >= 0 && size > 0) {
+                if (text.length() > 0) {
+                    text = text.toLowerCase();
+                    Pageable pageable = PageRequest.of(from / size, size,
+                            Sort.by("id").descending());
+                    return itemRepository.search(pageable, text).stream()
+                            .map(ItemMapper::toItemDto)
+                            .collect(Collectors.toList());
+                } else {
+                    return new ArrayList<>();
+                }
+            } else {
+                throw new WrongCommandException("Неправильный запрос from и size");
+            }
         } else {
-            return new ArrayList<>();
+            if (text.length() > 0) {
+                text = text.toLowerCase();
+                return itemRepository.search(text).stream()
+                        .map(ItemMapper::toItemDto)
+                        .collect(Collectors.toList());
+            } else {
+                return new ArrayList<>();
+            }
         }
     }
 
