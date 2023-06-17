@@ -116,6 +116,7 @@ public class ItemServiceImpl implements ItemService {
                 items = itemRepository.searchByOwner(pageable, ownerId);
             } else {
                 throw new WrongCommandException("Неправильный запрос from и size");
+
             }
         } else {
             items = itemRepository.searchByOwner(ownerId);
