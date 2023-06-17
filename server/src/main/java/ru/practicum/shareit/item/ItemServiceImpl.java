@@ -112,12 +112,11 @@ public class ItemServiceImpl implements ItemService {
         Collection<Item> items;
         if (from != null && size != null) {
             if (from >= 0 && size > 0) {
-                Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").descending());
+                Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
                 items = itemRepository.searchByOwner(pageable, ownerId);
             } else {
                 throw new WrongCommandException("Неправильный запрос from и size");
             }
-
         } else {
             items = itemRepository.searchByOwner(ownerId);
         }
@@ -142,8 +141,7 @@ public class ItemServiceImpl implements ItemService {
             if (from >= 0 && size > 0) {
                 if (text.length() > 0) {
                     text = text.toLowerCase();
-                    Pageable pageable = PageRequest.of(from / size, size,
-                            Sort.by("id").descending());
+                    Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
                     return itemRepository.search(pageable, text).stream()
                             .map(ItemMapper::toItemDto)
                             .collect(Collectors.toList());

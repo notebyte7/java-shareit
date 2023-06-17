@@ -11,4 +11,3 @@ public class WrongStateException extends RuntimeException {
         super(message);
     }
 }
-

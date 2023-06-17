@@ -116,7 +116,7 @@ public class BookingServiceImpl implements BookingService {
         if (userRepository.existsById(userId)) {
             if (from != null && size != null) {
                 if (from >= 0 && size > 0) {
-                    Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").descending());
+                    Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
                     if (state.equals(State.ALL)) {
                         return bookingRepository.findAllByBookerIdOrderByStartDesc(pageable, userId).stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
@@ -181,8 +181,7 @@ public class BookingServiceImpl implements BookingService {
             if (itemRepository.findByOwnerId(userId).size() > 0) {
                 if (from != null && size != null) {
                     if (from >= 0 && size > 0) {
-                        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id")
-                                .descending());
+                        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
                         if (state.equals(State.ALL)) {
                             return bookingRepository.findByItemOwnerIdOrderByStartDesc(pageable, userId).stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker)

@@ -59,13 +59,12 @@ public class BookingClient extends BaseClient {
     }
 
     private State getState(String state) {
-        State stateEnum;
+        State stateStatus;
         try {
-            stateEnum = State.valueOf(state);
+            stateStatus = State.valueOf(state);
         } catch (IllegalArgumentException e) {
             throw new WrongStateException(String.format("Unknown state: %s", state));
         }
-        return stateEnum;
+        return stateStatus;
     }
-
 }
