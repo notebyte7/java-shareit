@@ -5,6 +5,5 @@ import lombok.Value;
 @Value
 public class BookingShortDto {
     Integer id;
-
     Integer bookerId;
 }

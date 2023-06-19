@@ -10,7 +10,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.WrongCommandException;
-import ru.practicum.shareit.exeption.WrongStateException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserRepository;
@@ -134,12 +133,10 @@ public class BookingServiceImpl implements BookingService {
                         return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.WAITING)
                                 .stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                    } else if (state.equals(State.REJECTED)) {
+                    } else {
                         return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.REJECTED)
                                 .stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                    } else {
-                        throw new WrongStateException(String.format("Unknown state: %s", state));
                     }
                 } else {
                     throw new WrongCommandException("Неправильный запрос from и size");
@@ -163,11 +160,9 @@ public class BookingServiceImpl implements BookingService {
                 } else if (state.equals(State.WAITING)) {
                     return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else if (state.equals(State.REJECTED)) {
+                } else {
                     return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else {
-                    throw new WrongStateException(String.format("Unknown state: %s", state));
                 }
             }
         } else {
@@ -201,12 +196,10 @@ public class BookingServiceImpl implements BookingService {
                             return bookingRepository.findBookingsByOwnerAndStatus(pageable, userId, Status.WAITING)
                                     .stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                        } else if (state.equals(State.REJECTED)) {
+                        } else {
                             return bookingRepository.findBookingsByOwnerAndStatus(pageable, userId, Status.REJECTED)
                                     .stream()
                                     .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                        } else {
-                            throw new WrongStateException(String.format("Unknown state: %s", state));
                         }
                     } else {
                         throw new WrongCommandException("Неправильный запрос from и size");
@@ -228,11 +221,9 @@ public class BookingServiceImpl implements BookingService {
                     } else if (state.equals(State.WAITING)) {
                         return bookingRepository.findBookingsByOwnerAndStatus(userId, Status.WAITING).stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                    } else if (state.equals(State.REJECTED)) {
+                    } else {
                         return bookingRepository.findBookingsByOwnerAndStatus(userId, Status.REJECTED).stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                    } else {
-                        throw new WrongStateException(String.format("Unknown state: %s", state));
                     }
                 }
             } else {

@@ -1,18 +1,10 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.exeption.ErrorResponse;
-import ru.practicum.shareit.exeption.WrongStateException;
-
-import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -57,31 +49,5 @@ public class BookingController {
                                              @RequestParam(defaultValue = "10", required = false) Integer size) {
 
         return bookingClient.getBookingByOwner(userId, state, from, size);
-    }
-
-
-    @ExceptionHandler({BindException.class, HttpMessageNotReadableException.class,
-            MethodArgumentTypeMismatchException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleBadRequestException(final Exception e) {
-        String message;
-        String defaultMessage = "Invalid data format: ";
-        if (e instanceof BindException) {
-            message = defaultMessage + Objects.requireNonNull(((BindException) e).getFieldError()).getField();
-        } else if (e.getClass().equals(HttpMessageNotReadableException.class)) {
-            message = defaultMessage + ((HttpMessageNotReadableException) e).getMostSpecificCause();
-        } else if (e.getClass().equals(MethodArgumentTypeMismatchException.class)) {
-            message = defaultMessage + "request data";
-        } else {
-            message = e.getMessage();
-        }
-        return new ErrorResponse(message);
-    }
-
-
-    @ExceptionHandler({Throwable.class, WrongStateException.class})
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleThrowable(final Throwable e) {
-        return new ErrorResponse(e.getMessage());
     }
 }
