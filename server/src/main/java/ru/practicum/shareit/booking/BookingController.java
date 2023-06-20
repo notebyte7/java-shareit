@@ -40,18 +40,16 @@ public class BookingController {
     @GetMapping()
     @ResponseBody
     List<BookingOutputDto> getBookingByUser(@RequestHeader(value = "X-Sharer-User-Id", required = false) int userId,
-                                            @RequestParam(defaultValue = "ALL", required = false) String state,
+                                            @RequestParam(defaultValue = "ALL", required = false) State state,
                                             @RequestParam(required = false) Integer from, Integer size) {
-        State stateEnum = State.valueOf(state);
-        return bookingService.getBookingByUser(userId, stateEnum, from, size);
+        return bookingService.getBookingByUser(userId, state, from, size);
     }
 
     @GetMapping("/owner")
     @ResponseBody
     List<BookingOutputDto> getBookingByOwner(@RequestHeader(value = "X-Sharer-User-Id", required = false) int userId,
-                                             @RequestParam(defaultValue = "ALL", required = false) String state,
+                                             @RequestParam(defaultValue = "ALL", required = false) State state,
                                              @RequestParam(required = false) Integer from, Integer size) {
-        State stateStatus = State.valueOf(state);
-        return bookingService.getBookingByOwner(userId, stateStatus, from, size);
+        return bookingService.getBookingByOwner(userId, state, from, size);
     }
 }

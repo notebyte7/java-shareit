@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
+import ru.practicum.shareit.exeption.InvalidArgumentException;
 import ru.practicum.shareit.exeption.NotFoundException;
 import ru.practicum.shareit.exeption.WrongCommandException;
 import ru.practicum.shareit.item.ItemRepository;
@@ -133,10 +134,12 @@ public class BookingServiceImpl implements BookingService {
                         return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.WAITING)
                                 .stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                    } else {
+                    } else if (state.equals(State.REJECTED)) {
                         return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, Status.REJECTED)
                                 .stream()
                                 .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                    } else {
+                        throw new InvalidArgumentException("InvalidArgumentException");
                     }
                 } else {
                     throw new WrongCommandException("Неправильный запрос from и size");
@@ -160,9 +163,11 @@ public class BookingServiceImpl implements BookingService {
                 } else if (state.equals(State.WAITING)) {
                     return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.WAITING).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
-                } else {
+                } else if (state.equals(State.REJECTED)) {
                     return bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, Status.REJECTED).stream()
                             .map(BookingMapper::toBookingDtoWithItemAndBooker).collect(Collectors.toList());
+                } else {
+                    throw new InvalidArgumentException("InvalidArgumentException");
                 }
             }
         } else {
