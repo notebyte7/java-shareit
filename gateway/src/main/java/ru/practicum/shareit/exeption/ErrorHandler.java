@@ -23,7 +23,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler({BindException.class, HttpMessageNotReadableException.class,
-            MethodArgumentTypeMismatchException.class, WrongStateException.class})
+            MethodArgumentTypeMismatchException.class, WrongStateException.class, WrongCommandException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadRequestException(final Exception e) {
         String message;

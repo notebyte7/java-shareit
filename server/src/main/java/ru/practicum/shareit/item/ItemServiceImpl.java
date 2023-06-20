@@ -111,13 +111,8 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemOutputDto> getItemsByOwner(int ownerId, Integer from, Integer size) {
         Collection<Item> items;
         if (from != null && size != null) {
-            if (from >= 0 && size > 0) {
-                Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
-                items = itemRepository.searchByOwner(pageable, ownerId);
-            } else {
-                throw new WrongCommandException("Неправильный запрос from и size");
-
-            }
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
+            items = itemRepository.searchByOwner(pageable, ownerId);
         } else {
             items = itemRepository.searchByOwner(ownerId);
         }
@@ -139,18 +134,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public Collection<ItemDto> searchItemsByText(String text, Integer from, Integer size) {
         if (from != null && size != null) {
-            if (from >= 0 && size > 0) {
-                if (text.length() > 0) {
-                    text = text.toLowerCase();
-                    Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
-                    return itemRepository.search(pageable, text).stream()
-                            .map(ItemMapper::toItemDto)
-                            .collect(Collectors.toList());
-                } else {
-                    return new ArrayList<>();
-                }
+            if (text.length() > 0) {
+                text = text.toLowerCase();
+                Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").ascending());
+                return itemRepository.search(pageable, text).stream()
+                        .map(ItemMapper::toItemDto)
+                        .collect(Collectors.toList());
             } else {
-                throw new WrongCommandException("Неправильный запрос from и size");
+                return new ArrayList<>();
             }
         } else {
             if (text.length() > 0) {

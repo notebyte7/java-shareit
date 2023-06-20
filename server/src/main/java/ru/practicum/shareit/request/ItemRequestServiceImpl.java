@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeption.NotFoundException;
-import ru.practicum.shareit.exeption.WrongCommandException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.UserRepository;
@@ -65,14 +64,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Override
     public Collection<ItemRequestDto> getRequestsAll(int userId, Integer from, Integer size) {
         if (from != null && size != null) {
-            if (from >= 0 && size > 0) {
-                Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
-                return requestRepository.findByRequestorIdNotOrderByCreatedDesc(userId, pageable).getContent().stream()
-                        .map(ItemRequestMapper::toItemRequestDto)
-                        .collect(Collectors.toList());
-            } else {
-                throw new WrongCommandException("Неправильный запрос from и size");
-            }
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
+            return requestRepository.findByRequestorIdNotOrderByCreatedDesc(userId, pageable).getContent().stream()
+                    .map(ItemRequestMapper::toItemRequestDto)
+                    .collect(Collectors.toList());
         } else {
             return new ArrayList<>();
         }

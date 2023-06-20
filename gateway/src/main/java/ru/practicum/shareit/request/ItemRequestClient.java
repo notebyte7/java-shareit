@@ -8,6 +8,7 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
+import ru.practicum.shareit.exeption.WrongCommandException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 
 import java.util.Map;
@@ -39,7 +40,11 @@ public class ItemRequestClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        return get("/all?from={from}&size={size}", userId, parameters);
+        if (from >= 0 && size > 0) {
+            return get("/all?from={from}&size={size}", userId, parameters);
+        } else {
+            throw new WrongCommandException("Неправильный запрос from и size");
+        }
     }
 
     public ResponseEntity<Object> getRequests(long userId, Long requestId) {
