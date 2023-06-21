@@ -40,14 +40,18 @@ public class ItemRequestClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        if (from >= 0 && size > 0) {
-            return get("/all?from={from}&size={size}", userId, parameters);
-        } else {
-            throw new WrongCommandException("Неправильный запрос from и size");
-        }
+        checkFromSize(from, size);
+        return get("/all?from={from}&size={size}", userId, parameters);
+
     }
 
     public ResponseEntity<Object> getRequests(long userId, Long requestId) {
         return get("/" + requestId, userId);
+    }
+
+    protected void checkFromSize(Integer from, Integer size) {
+        if (!(from >= 0 && size > 0)) {
+            throw new WrongCommandException("Неправильный запрос from и size");
+        }
     }
 }

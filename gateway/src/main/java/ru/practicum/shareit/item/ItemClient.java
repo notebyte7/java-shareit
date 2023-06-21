@@ -33,11 +33,9 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        if (from >= 0 && size > 0) {
-            return get("?from={from}&size={size}", userId, parameters);
-        } else {
-            throw new WrongCommandException("Неправильный запрос from и size");
-        }
+        checkFromSize(from, size);
+        return get("?from={from}&size={size}", userId, parameters);
+
     }
 
     public ResponseEntity<Object> getItemDtoById(long userId, Long id) {
@@ -50,11 +48,9 @@ public class ItemClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        if (from >= 0 && size > 0) {
-            return get("/search?text={text}&from={from}&size={size}", userId, parameters);
-        } else {
-            throw new WrongCommandException("Неправильный запрос from и size");
-        }
+        checkFromSize(from, size);
+        return get("/search?text={text}&from={from}&size={size}", userId, parameters);
+
     }
 
     public ResponseEntity<Object> createItem(long ownerId, ItemDto itemDto) {
@@ -67,5 +63,11 @@ public class ItemClient extends BaseClient {
 
     public ResponseEntity<Object> updateItem(long userId, Long id, String json) {
         return patch("/" + id, userId, json);
+    }
+
+    protected void checkFromSize(Integer from, Integer size) {
+        if (!(from >= 0 && size > 0)) {
+            throw new WrongCommandException("Неправильный запрос from и size");
+        }
     }
 }

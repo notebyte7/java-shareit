@@ -38,11 +38,8 @@ public class BookingClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        if (from >= 0 && size > 0) {
-            return get("?state={state}&from={from}&size={size}", userId, parameters);
-        } else {
-            throw new WrongCommandException("Неправильный запрос from и size");
-        }
+        checkFromSize(from, size);
+        return get("?state={state}&from={from}&size={size}", userId, parameters);
     }
 
     public ResponseEntity<Object> getBookingByOwner(long userId, String state, Integer from, Integer size) {
@@ -51,13 +48,9 @@ public class BookingClient extends BaseClient {
                 "from", from,
                 "size", size
         );
-        if (from >= 0 && size > 0) {
-            return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
-        } else {
-            throw new WrongCommandException("Неправильный запрос from и size");
-        }
+        checkFromSize(from, size);
+        return get("/owner?state={state}&from={from}&size={size}", userId, parameters);
     }
-
 
     public ResponseEntity<Object> createBooking(long userId, BookingDto bookingDto) {
         return post("", userId, bookingDto);
@@ -75,5 +68,11 @@ public class BookingClient extends BaseClient {
             throw new WrongStateException(String.format("Unknown state: %s", state));
         }
         return stateStatus;
+    }
+
+    protected void checkFromSize(Integer from, Integer size) {
+        if (!(from >= 0 && size > 0)) {
+            throw new WrongCommandException("Неправильный запрос from и size");
+        }
     }
 }

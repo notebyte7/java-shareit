@@ -15,7 +15,7 @@ import java.util.Objects;
 @Slf4j
 public class ErrorHandler {
 
-    @ExceptionHandler({Throwable.class, InvalidArgumentException.class})
+    @ExceptionHandler({Throwable.class})
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Throwable e) {
         log.warn(e.getMessage(), e);
